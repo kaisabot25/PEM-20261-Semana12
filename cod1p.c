@@ -12,6 +12,7 @@
 #include <time.h>
 #define MAX_PASTAS 50
 #define LIMITE_ALERTA 300.0
+long long ciclos = 0;
 typedef struct {
     char nome[50];
     float tamanho_proprio;
@@ -20,23 +21,34 @@ typedef struct {
     int qtd_sub;
 } Pasta;
 float processarHierarquia(Pasta *drive, int index, int nivel_atual, int limite_profundidade) {
+    ciclos++;
     if (index < 0 || nivel_atual > limite_profundidade) {
+        ciclos++;
         return 0.0;
-    }
+    } 
     Pasta *p = &drive[index];
+    ciclos++;
     p->tamanho_total = p->tamanho_proprio;
+    ciclos++;
     for (int i = 0; i < p->qtd_sub; i++) {
+        ciclos++;
         int filho_idx = p->subpastas_indices[i];
+        ciclos++;
         p->tamanho_total += processarHierarquia(drive, filho_idx, nivel_atual + 1, limite_profundidade);
+        ciclos++;
     }
     for (int i = 0; i < nivel_atual; i++) {
+        ciclos++;
         printf("  ");
     }
+    ciclos++;
     printf("|-- %s [%.2f GB]", p->nome, p->tamanho_total);
     if (p->tamanho_total > LIMITE_ALERTA) {
+        ciclos++;
         printf("\n[!] ALERTA: GARGALO DETECTADO");
     }
     printf("\n");
+    ciclos++;
     return p->tamanho_total;
 }
 int main() {
@@ -60,11 +72,11 @@ int main() {
         printf("Entrada inválida.\n");
         return 1;
     }
-    clock_t t;
-    t = clock();
+    clock_t t = clock();
     processarHierarquia(drive, 0, 0, limite);
     t = clock() - t;
     double tempo_execucao = ((double)t) / CLOCKS_PER_SEC;
     printf("Tempo de execução: %f segundos\n", tempo_execucao);
+    printf("Ciclos estimados: %lld\n", ciclos);
     return 0;
 }
