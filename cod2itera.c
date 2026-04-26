@@ -12,6 +12,7 @@
 #include <time.h>
 #define MAX_PASTAS 50
 #define LIMITE_ALERTA 300.0
+long long ciclos = 0;
 typedef struct {
     char nome[50];
     float tamanho_proprio;
@@ -47,38 +48,58 @@ int main() {
         printf("Entrada inválida.\n");
         return 1;
     }
-    clock_t t;
-    t = clock(); // início
+    clock_t t = clock();
     stack[++top] = (StackItem){0, 0, 0};
+    ciclos++;
     while (top >= 0) {
+        ciclos++;
         StackItem current = stack[top--];
-        if (current.nivel > limite) continue;
+        ciclos++;
+        if (current.nivel > limite) {
+            ciclos++;
+            continue;
+        }
         int idx = current.index;
         Pasta *p = &drive[idx];
+        ciclos++;
         if (!current.visitado) {
+            ciclos++;
             stack[++top] = (StackItem){idx, current.nivel, 1};
+            ciclos++;
             for (int i = p->qtd_sub - 1; i >= 0; i--) {
+                ciclos++;
                 int filho = p->subpastas_indices[i];
+                ciclos++;
                 stack[++top] = (StackItem){filho, current.nivel + 1, 0};
+                ciclos++;
             }
         } else {
+            ciclos++;
             p->tamanho_total = p->tamanho_proprio;
+            ciclos++;
             for (int i = 0; i < p->qtd_sub; i++) {
+                ciclos++;
                 int filho = p->subpastas_indices[i];
+                ciclos++;
                 p->tamanho_total += drive[filho].tamanho_total;
+                ciclos++;
             }
             for (int i = 0; i < current.nivel; i++) {
+                ciclos++;
                 printf("  ");
             }
             printf("|-- %s [%.2f GB]", p->nome, p->tamanho_total);
             if (p->tamanho_total > LIMITE_ALERTA) {
+                ciclos++;
                 printf("\n[!] ALERTA: GARGALO DETECTADO");
             }
             printf("\n");
+            ciclos++;
         }
     }
     t = clock() - t;
     double tempo_execucao = ((double)t) / CLOCKS_PER_SEC;
     printf("Tempo de execução: %f segundos\n", tempo_execucao);
+    printf("Ciclos estimados: %lld\n", ciclos);
     return 0;
 }
